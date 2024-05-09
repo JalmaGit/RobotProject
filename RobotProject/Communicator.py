@@ -27,8 +27,8 @@ import math
 
 class ThreeDofCommunicator(Node):
 
-
     def __init__(self):
+        self.kinematics = Kinematics.Kinematics()
         super().__init__('ThreeDofCommunicator')
         self.publisher_ = self.create_publisher(JointTrajectory, 'joint_trajectory_controller/joint_trajectory', 10)
         timer_period = 0.2  # seconds
@@ -43,7 +43,10 @@ class ThreeDofCommunicator(Node):
         points = JointTrajectoryPoint()
         point = round(80.0+30*math.sin(self.i),2)
 
+
+
         points.positions = [point, point, point]
+        print(self.kinematics.inverse_kinematics(0,0,0))
         
         duration_msg = Duration()
         duration_msg.sec = 0  # You can adjust these values based on your requirements

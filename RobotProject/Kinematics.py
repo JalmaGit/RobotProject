@@ -36,6 +36,7 @@ class Kinematics:
         return T
 
     def update_position(self, T, initial_pos):
+        array_eq = np.vstack([initial_pos, [1,1,1]])
         new_pos = np.dot(T, initial_pos)
         return new_pos
 
