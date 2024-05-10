@@ -1,8 +1,8 @@
 import numpy as np
 
-#L = 8cm
+#L = 20cm
 class Kinematics:
-    def __init__(self, theta_r=0, theta_p=0, L=8):
+    def __init__(self, theta_r=0, theta_p=0, L=24):
         self.theta_r = theta_r
         self.theta_p = theta_p
         self.L = L
@@ -13,7 +13,7 @@ class Kinematics:
                 [0, 0, 0]]
 
     def translation_vector(self, z_A, z_B, z_C):
-        return [z_A, z_B, z_C]
+        return np.array([z_A, z_B, z_C])
 
     def roll_rotation(self):
         return [[np.cos(self.theta_r), 0, -np.sin(self.theta_r)],
@@ -32,7 +32,6 @@ class Kinematics:
         T = np.eye(4)
         T[:3, :3] = np.dot(roll_transform, pitch_transform)
         T[:3, 3] = translation_vector
-
         return T
 
     def update_position(self, T, initial_pos):
@@ -48,11 +47,19 @@ class Kinematics:
         ard_motor_B = self.position_to_angle(new_pos[2][1], self.L)
         ard_motor_C = self.position_to_angle(new_pos[2][2], self.L)
         return np.array([ard_motor_A, ard_motor_B, ard_motor_C])
+    
 
-    def inverse_kinematics(self, x, y, z):
-        translation_vec = self.translation_vector(x, y, z)
+    def inverse_kinematics(self, roll, pitch, z):
+        self.theta_p = pitch
+        self.theta_r = roll
+        translation_vec = self.translation_vector(0, 0, z)
         T = self.homogeneous_transform(translation_vec)
         new_pos = self.update_position(T, self.initial_position())
         motor_angles = self.motor_angle(new_pos)
 
-        return motor_angles
+        motor_angles_deg = np.rad2deg(motor_angles)
+        motor_angles_deg = 90 + motor_angles_deg
+
+        motor_angles_deg = np.round(motor_angles_deg,2)
+
+        return motor_angles_deg.tolist()

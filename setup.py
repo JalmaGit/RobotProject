@@ -20,8 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-                '3dofController = RobotProject.Communicator:main',
-                'Simulate = RobotProject.SimSubscriber:main',
+                'Kinematics = RobotProject.Kinematics_node:main',
+                'Controller = RobotProject.Controller_node:main',
         ],
     },
 )

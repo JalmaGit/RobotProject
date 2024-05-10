@@ -25,13 +25,16 @@ from builtin_interfaces.msg import Duration
 from sensor_msgs.msg import Image
 import math
 
-class ThreeDofCommunicator(Node):
+class KinematicsCom(Node):
+
+    #Subscribe to roll and pitch topic
+    #Publish Motor Angle joints
 
     def __init__(self):
         self.kinematics = Kinematics.Kinematics()
         super().__init__('ThreeDofCommunicator')
         self.publisher_ = self.create_publisher(JointTrajectory, 'joint_trajectory_controller/joint_trajectory', 10)
-        timer_period = 0.1  # seconds
+        timer_period = 0.2  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
 
@@ -41,16 +44,21 @@ class ThreeDofCommunicator(Node):
         msg.joint_names = ['ard_motorA', 'ard_motorB', 'ard_motorC'] 
 
         points = JointTrajectoryPoint()
-        point = round(80.0+30*math.sin(self.i),2)
+        roll = round(1*math.sin(self.i),1)
+        pitch = round(1*math.cos(self.i),1)
 
+        print(roll)
 
+        #points.positions = [point, point, point]
 
-        points.positions = [point, point, point]
-        print(self.kinematics.inverse_kinematics(-2,2,7.5))
+        newPoints = self.kinematics.inverse_kinematics(roll, pitch, 0)
+        print(newPoints)
+
+        points.positions = newPoints
         
         duration_msg = Duration()
         duration_msg.sec = 0  # You can adjust these values based on your requirements
-        duration_msg.nanosec = 100000000  # For example, 0.1 seconds
+        duration_msg.nanosec = 90000000  # For example, 0.1 seconds
         points.time_from_start = duration_msg
 
         msg.points.append(points)
@@ -64,7 +72,7 @@ class ThreeDofCommunicator(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_publisher = ThreeDofCommunicator()
+    minimal_publisher = KinematicsCom()
 
     rclpy.spin(minimal_publisher)
 
