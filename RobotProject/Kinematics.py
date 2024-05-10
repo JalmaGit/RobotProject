@@ -37,7 +37,7 @@ class Kinematics:
 
     def update_position(self, T, initial_pos):
         array_eq = np.vstack([initial_pos, [1,1,1]])
-        new_pos = np.dot(T, initial_pos)
+        new_pos = np.dot(T, array_eq)
         return new_pos
 
     def position_to_angle(self, z, r):
