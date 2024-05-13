@@ -10,6 +10,7 @@
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>angle_msg</exec_depend>
+  <exec_depend>launch</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
@@ -18,5 +19,6 @@
 
   <export>
     <build_type>ament_python</build_type>
+    <launch_ros launch_file="share/RobotProject/Robot_Project.launch.py"/>
   </export>
 </package>
