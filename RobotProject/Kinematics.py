@@ -1,14 +1,16 @@
 import numpy as np
 
-#L = 20cm
+#L = 24cm
 class Kinematics:
-    def __init__(self, theta_r=0, theta_p=0, L=24):
+    def __init__(self, theta_r=0, theta_p=0, L=24, R=2.5):
         self.theta_r = theta_r
         self.theta_p = theta_p
         self.L = L
+        self.R = R
+        self.z = 0
 
     def initial_position(self):
-        return [[self.L / (2 * np.sqrt(3)), self.L / (2 * np.sqrt(3)), (-self.L * np.sqrt(3)) / 4],
+        return [[self.L / (2 * np.sqrt(3)), self.L / (2 * np.sqrt(3)), (-self.L /np.sqrt(3)) ],
                 [self.L / 2, -self.L / 2, 0],
                 [0, 0, 0]]
 
@@ -32,6 +34,7 @@ class Kinematics:
         T = np.eye(4)
         T[:3, :3] = np.dot(roll_transform, pitch_transform)
         T[:3, 3] = translation_vector
+
         return T
 
     def update_position(self, T, initial_pos):
@@ -52,7 +55,10 @@ class Kinematics:
     def inverse_kinematics(self, roll, pitch, z):
         self.theta_p = pitch
         self.theta_r = roll
+        self.z = z
         translation_vec = self.translation_vector(0, 0, z)
+
+        print(f"{translation_vec=}")
         T = self.homogeneous_transform(translation_vec)
         new_pos = self.update_position(T, self.initial_position())
         motor_angles = self.motor_angle(new_pos)

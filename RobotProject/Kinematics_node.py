@@ -15,14 +15,10 @@
 import rclpy
 from rclpy.node import Node
 
-from . import CameraVision
-from . import Controller
 from . import Kinematics
 
-from std_msgs.msg import String
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from builtin_interfaces.msg import Duration
-from sensor_msgs.msg import Image
+from angle_msg.msg import Pitchroll
 import math
 
 class KinematicsCom(Node):
@@ -34,38 +30,49 @@ class KinematicsCom(Node):
         self.kinematics = Kinematics.Kinematics()
         super().__init__('ThreeDofCommunicator')
         self.publisher_ = self.create_publisher(JointTrajectory, 'joint_trajectory_controller/joint_trajectory', 10)
-        timer_period = 0.2  # seconds
+        self.subscription = self.create_subscription(Pitchroll, 'pitch_roll_message',
+            self.listener_callback, 10)
+        self.subscription
+       
+        timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
+
         self.i = 0
+        self.last_publish_time = self.get_clock().now()
+
+        self.pitchroll_msg = Pitchroll()
+
+    def listener_callback(self, msg):
+        self.pitchroll_msg.roll = msg.roll
+        self.pitchroll_msg.pitch = msg.pitch
+        self.get_logger().info('I heard: "%d"' % msg.roll) # CHANGE
 
     def timer_callback(self):
         msg = JointTrajectory()
-        msg.header.stamp = self.get_clock().now().to_msg()
+    
+        current_time = self.get_clock().now()
+        msg.header.stamp = current_time.to_msg()
+
         msg.joint_names = ['ard_motorA', 'ard_motorB', 'ard_motorC'] 
-
+        
         points = JointTrajectoryPoint()
-        roll = round(1*math.sin(self.i),1)
-        pitch = round(1*math.cos(self.i),1)
+        #roll = round(1*math.sin(self.i),1)
+        #pitch = round(1*math.cos(self.i),1)
 
-        print(roll)
-
-        #points.positions = [point, point, point]
-
-        newPoints = self.kinematics.inverse_kinematics(roll, pitch, 0)
+        newPoints = self.kinematics.inverse_kinematics(self.pitchroll_msg.roll, self.pitchroll_msg.pitch, 0)
         print(newPoints)
 
         points.positions = newPoints
         
-        duration_msg = Duration()
-        duration_msg.sec = 0  # You can adjust these values based on your requirements
-        duration_msg.nanosec = 90000000  # For example, 0.1 seconds
-        points.time_from_start = duration_msg
+        duration_since_last_publish = current_time - self.last_publish_time
+        points.time_from_start = duration_since_last_publish.to_msg()
 
         msg.points.append(points)
 
         self.publisher_.publish(msg)
+        self.last_publish_time = current_time
         self.get_logger().info('Publishing: "%s"' % points.positions)
-        self.i += 1
+        self.i += 0.5
 
 
 # The names of the active joints in each trajec
