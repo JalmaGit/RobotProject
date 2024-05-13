@@ -15,56 +15,54 @@
 import rclpy
 from rclpy.node import Node
 
-from . import CameraVision
 from . import Controller
-from . import Kinematics
 
-from std_msgs.msg import String
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from builtin_interfaces.msg import Duration
-from sensor_msgs.msg import Image
+from geometry_msgs.msg import Point
+from angle_msg.msg import Pitchroll
 import math
+import time
 
-class KinematicsCom(Node):
+class Controller_node(Node):
 
     #Subscribe to roll and pitch topic
     #Publish Motor Angle joints
 
     def __init__(self):
-        self.kinematics = Kinematics.Kinematics()
-        super().__init__('ThreeDofCommunicator')
-        self.publisher_ = self.create_publisher(JointTrajectory, 'joint_trajectory_controller/joint_trajectory', 10)
-        timer_period = 0.2  # seconds
+        self.PIDx = Controller.PID(0.04, 0.0, 0.0)
+        self.PIDy = Controller.PID(0.04, 0.0, 0.0)
+        
+        super().__init__('Controller_node')
+        self.publisher_ = self.create_publisher(Pitchroll, 'pitch_roll_message', 10)
+        self.subscription = self.create_subscription(Point, 'ball_position',
+            self.listener_callback, 10)
+        self.subscription
+        
+        timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
+        self.last_time = time.time()
+
+    def listener_callback(self, msg):
+            self.get_logger().info('I heard: "%d"' % msg.x) # CHANGE
 
     def timer_callback(self):
-        msg = JointTrajectory()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.joint_names = ['ard_motorA', 'ard_motorB', 'ard_motorC'] 
+        current_time = time.time()
+        delta_time = current_time - self.last_time
+        self.last_time = current_time
 
-        points = JointTrajectoryPoint()
-        roll = round(1*math.sin(self.i),1)
-        pitch = round(1*math.cos(self.i),1)
+        msg = Pitchroll()
 
-        print(roll)
+        roll = 0.5*math.cos(self.i)
+        pitch = 0.5*math.sin(self.i)
 
-        #points.positions = [point, point, point]
+        #roll = self.PIDx.control(0, xPos, delta_time)
+        #pitch = self.PIDy.control(0, yPos, delta_time)
 
-        newPoints = self.kinematics.inverse_kinematics(roll, pitch, 0)
-        print(newPoints)
-
-        points.positions = newPoints
-        
-        duration_msg = Duration()
-        duration_msg.sec = 0  # You can adjust these values based on your requirements
-        duration_msg.nanosec = 90000000  # For example, 0.1 seconds
-        points.time_from_start = duration_msg
-
-        msg.points.append(points)
+        msg.roll = roll
+        msg.pitch = pitch
 
         self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % points.positions)
+        self.get_logger().info('Publishing: "%s"' % msg.roll)
         self.i += 1
 
 
@@ -72,7 +70,7 @@ class KinematicsCom(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_publisher = KinematicsCom()
+    minimal_publisher = Controller_node()
 
     rclpy.spin(minimal_publisher)
 
