@@ -43,7 +43,7 @@ class Controller_node(Node):
         self.last_time = time.time()
 
     def listener_callback(self, msg):
-            self.get_logger().info('I heard: "%d"' % msg.x) # CHANGE
+        self.get_logger().info('I heard: "%d"' % msg.x) # CHANGE
 
     def timer_callback(self):
         current_time = time.time()
@@ -62,7 +62,7 @@ class Controller_node(Node):
         msg.pitch = pitch
 
         self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.roll)
+        #self.get_logger().info('Publishing: "%s"' % msg.roll)
         self.i += 1
 
 

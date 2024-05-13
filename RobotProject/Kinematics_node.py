@@ -45,7 +45,7 @@ class KinematicsCom(Node):
     def listener_callback(self, msg):
         self.pitchroll_msg.roll = msg.roll
         self.pitchroll_msg.pitch = msg.pitch
-        self.get_logger().info('I heard: "%d"' % msg.roll) # CHANGE
+        #self.get_logger().info('I heard: "%d"' % msg.roll) # CHANGE
 
     def timer_callback(self):
         msg = JointTrajectory()
@@ -71,7 +71,7 @@ class KinematicsCom(Node):
 
         self.publisher_.publish(msg)
         self.last_publish_time = current_time
-        self.get_logger().info('Publishing: "%s"' % points.positions)
+        #self.get_logger().info('Publishing: "%s"' % points.positions)
         self.i += 0.5
 
 

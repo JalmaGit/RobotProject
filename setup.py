@@ -24,6 +24,7 @@ setup(
                 'Kinematics = RobotProject.Kinematics_node:main',
                 'Controller = RobotProject.Controller_node:main',
                 'ball_detection_node = RobotProject.ball_detection_node:main',
+                'Camera = RobotProject.Camera_node:main'
         ],
     },
 )
