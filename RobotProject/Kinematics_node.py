@@ -19,7 +19,7 @@ from . import Kinematics
 
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from angle_msg.msg import Pitchroll
-import math
+from builtin_interfaces.msg import Duration
 
 class KinematicsCom(Node):
 
@@ -65,7 +65,11 @@ class KinematicsCom(Node):
         points.positions = newPoints
         
         duration_since_last_publish = current_time - self.last_publish_time
-        points.time_from_start = duration_since_last_publish.to_msg()
+        
+        #duration_msg = Duration()
+        #duration_msg.sec = 0  # You can adjust these values based on your requirements
+        #duration_msg.nanosec = 10000000  # For example, 0.1 seconds
+        points.time_from_start = duration_since_last_publish.to_msg()#duration_msg#
 
         msg.points.append(points)
 

@@ -11,7 +11,7 @@ class Kinematics:
 
     def initial_position(self):
         return [[self.L / (2 * np.sqrt(3)), self.L / (2 * np.sqrt(3)), (-self.L /np.sqrt(3)) ],
-                [self.L / 2, -self.L / 2, 0],
+                [-self.L / 2, +self.L / 2, 0],
                 [0, 0, 0]]
 
     def translation_vector(self, z_A, z_B, z_C):
