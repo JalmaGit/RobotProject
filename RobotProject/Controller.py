@@ -10,24 +10,36 @@ class PID():
         self.prevIntegral = 0
         self.prevError = 0
 
-        self.windupGuard = 0
-        self.enableWindup = False
+        self.windupGuard = 30
+        self.enableWindup = True
+        self.maxAngle = 30
+
+        self.P = 0
+        self.I = 0
+        self.D = 0
 
     def control(self, desired, actual, dt):
-        error = desired - actual
+        error = (desired - actual)
     
         P = error * self.kp
-        I = self.prevError + self.ki * error * dt
-        D = (error - self.prevError) / dt
+        I = self.prevIntegral + self.ki * error * dt
+        D = self.kd * ((error - self.prevError) / dt)
 
         if self.enableWindup:
             I = self.windup(I)
 
+        #print(f"{P=}, {I=}, {D=}")
+
         self.prevError = error
         self.prevIntegral = I
 
+        self.P = P
+        self.I = I
+        self.D = D
+
         return P + I + D
-    
+        
+
     def windup(self, I):
         
         if I >= self.windupGuard:

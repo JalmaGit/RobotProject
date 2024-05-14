@@ -19,7 +19,7 @@ from . import Controller
 
 from geometry_msgs.msg import Point
 from angle_msg.msg import Pitchroll
-import math
+import numpy as np
 import time
 
 class Controller_node(Node):
@@ -28,8 +28,12 @@ class Controller_node(Node):
     #Publish Motor Angle joints
 
     def __init__(self):
-        self.PIDx = Controller.PID(0.04, 0.0, 0.0)
-        self.PIDy = Controller.PID(0.04, 0.0, 0.0)
+        kp = 0.2 #0.0008#0.007 #0.4 Max
+        ki = 10 #0.001#0.001
+        kd = 0.0 #0.0075#0.008
+
+        self.PIDx = Controller.PID(kp, ki, kd)
+        self.PIDy = Controller.PID(kp, ki, kd)
         
         super().__init__('Controller_node')
         self.publisher_ = self.create_publisher(Pitchroll, 'pitch_roll_message', 10)
@@ -37,33 +41,40 @@ class Controller_node(Node):
             self.listener_callback, 10)
         self.subscription
         
-        timer_period = 0.1  # seconds
+        timer_period = 0.001  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
         self.last_time = time.time()
+        self.point = Point()
+        self.flagg = False
 
     def listener_callback(self, msg):
-        self.get_logger().info('I heard: "%d"' % msg.x) # CHANGE
+        self.flagg = True
+        self.point = msg
 
     def timer_callback(self):
-        current_time = time.time()
-        delta_time = current_time - self.last_time
-        self.last_time = current_time
+        if self.flagg:    
+            self.flagg = False
 
-        msg = Pitchroll()
+            current_time = time.time()
+            delta_time = current_time - self.last_time
+            self.last_time = current_time
 
-        roll = 0.5*math.cos(self.i)
-        pitch = 0.5*math.sin(self.i)
+            msg = Pitchroll()
 
-        #roll = self.PIDx.control(0, xPos, delta_time)
-        #pitch = self.PIDy.control(0, yPos, delta_time)
+            centerpoint = [340, 244]
 
-        msg.roll = roll
-        msg.pitch = pitch
+            #roll = (340 - self.point.x)/100
+            #pitch = (244 - self.point.y)/100
 
-        self.publisher_.publish(msg)
-        #self.get_logger().info('Publishing: "%s"' % msg.roll)
-        self.i += 1
+            roll = self.PIDx.control(centerpoint[0], self.point.x, delta_time)
+            pitch = self.PIDy.control(centerpoint[1], self.point.y, delta_time)
+
+            msg.roll = np.deg2rad(roll)
+            msg.pitch = np.deg2rad(pitch)
+
+            self.publisher_.publish(msg)
+            self.get_logger().info('Publishing roll: "%s"' % np.rad2deg(msg.roll))
+            self.get_logger().info('Reading I: "%s"' % self.PIDx.I)
 
 
 # The names of the active joints in each trajec
