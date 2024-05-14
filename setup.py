@@ -1,4 +1,6 @@
 from setuptools import find_packages, setup
+import os
+from glob import glob
 
 package_name = 'RobotProject'
 
@@ -10,7 +12,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name, ['launch/Robot_Project.launch.py'])
+        ('share/' + package_name, ['launch/Robot_Project.launch.py']),
+        ('share/' + package_name, ['urdf/platform2.urdf'])
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,7 +27,8 @@ setup(
                 'Kinematics = RobotProject.Kinematics_node:main',
                 'Controller = RobotProject.Controller_node:main',
                 'ball_detection_node = RobotProject.ball_detection_node:main',
-                'Camera = RobotProject.Camera_node:main'
+                'Camera = RobotProject.Camera_node:main',
+                'Sim_node = RobotProject.sim_node:main' 
         ],
     },
 )

@@ -63,11 +63,12 @@ class Controller_node(Node):
 
             centerpoint = [340, 244]
 
-            #roll = (340 - self.point.x)/100
-            #pitch = (244 - self.point.y)/100
+            
+            roll = (340 - self.point.x)
+            pitch = (244 - self.point.y)
 
-            roll = self.PIDx.control(centerpoint[0], self.point.x, delta_time)
-            pitch = self.PIDy.control(centerpoint[1], self.point.y, delta_time)
+            #roll = self.PIDx.control(centerpoint[0], self.point.x, delta_time)
+            #pitch = self.PIDy.control(centerpoint[1], self.point.y, delta_time)
 
             msg.roll = np.deg2rad(roll)
             msg.pitch = np.deg2rad(pitch)
