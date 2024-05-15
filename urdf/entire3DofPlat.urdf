@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="platform">
+    <xacro:property name="servo_x" value="0.06" />
+    <xacro:property name="servo_y" value="0.037" />
+    <xacro:property name="servo_z" value="0.06" />
+    <xacro:property name="rotor_x" value="0.032" />
+    <xacro:property name="rotor_y" value="0.01" />
+    <xacro:property name="rotor_z" value="0.01" />
+    <xacro:property name="leg_x" value="0.075" />
+    <xacro:property name="leg_y" value="0.01" />
+    <xacro:property name="leg_z" value="0.01" />
+
+    <material name="blue">
+        <color rgba="0 0 0.8 1"/>
+    </material>
+
+    <material name="red">
+        <color rgba="1 0 0 1"/>
+    </material>
+
+    <material name="white">
+        <color rgba="1 1 1 1"/>
+    </material>
+
+
+    <xacro:macro name="servo" params="prefix servo_origin servo_yaw">
+        <link name="servo_${prefix}">
+            <visual>
+                <geometry>
+                    <box size="${servo_x} ${servo_y} ${servo_z}"/>
+                </geometry>
+                <material name="blue"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <box size="${servo_x} ${servo_y} ${servo_z}"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <joint name="base_to_servo_${prefix}" type="fixed">
+            <parent link="base_plate"/>
+            <child link="servo_${prefix}"/>
+            <origin xyz="${servo_origin}" rpy="0 0 ${servo_yaw}"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="rotor" params="prefix">
+        <link name="rotor_${prefix}">
+            <origin xyz="${rotor_x/2} 0 0" />
+            <visual>
+                <geometry>
+                    <box size="${rotor_x} ${rotor_y} ${rotor_z}"/>
+                </geometry>
+                <origin xyz="${rotor_x/2} 0 0" />
+                <material name="white"/>
+            </visual>
+        </link>
+
+        <joint name="servo_to_rotor_${prefix}" type="revolute">
+            <axis xyz="0 1 0"/>
+            <limit effort="1000.0" lower="-2" upper="2" velocity="0.5"/>
+            <parent link="servo_${prefix}"/>
+            <child link="rotor_${prefix}"/>
+            <origin xyz="0 -${(servo_y/2)+(rotor_y/2)} 0" rpy="0 0 0"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="leg" params="prefix">
+        <link name="leg_${prefix}">
+            <origin xyz="${leg_x/2} 0 0" />
+            <visual>
+                <geometry>
+                    <box size="${leg_x} ${leg_y} ${leg_z}"/>
+                </geometry>
+                <origin xyz="${leg_x/2} 0 0" />
+                <material name="red"/>
+            </visual>
+        </link>
+
+        <joint name="rotor_to_leg_${prefix}" type="continuous">
+            <axis xyz="0 1 0"/>
+            <parent link="rotor_${prefix}"/>
+            <child link="leg_${prefix}"/>
+            <origin xyz="${rotor_x} ${(rotor_y/2)+(leg_y/2)} 0" rpy="0 0 0"/>
+            <dynamics damping="0.001"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="leg_platform_joint" params="prefix">
+        <joint name="leg_${prefix}_to_platform" type="continuous">
+            <axis xyz="1 1 1"/>
+            <parent link="leg_${prefix}"/>
+            <child link="motion_platform"/>
+            <origin xyz="${leg_x} 0 0" rpy="0 0 0"/>
+            <dynamics damping="0.1"/>
+        </joint>
+    </xacro:macro>
+
+
+    <link name="base_plate">
+        <visual>
+            <geometry>
+                <box size="0.43 0.34 0.02"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.43 0.34 0.02"/>
+            </geometry>
+        </collision>
+    </link>
+
+
+    <xacro:servo prefix="1" servo_origin="-0.035 -0.085 ${(servo_y/2)+0.01}" servo_yaw="1.275" />
+    <xacro:rotor prefix="1" />
+    <xacro:leg prefix="1" />
+    <xacro:servo prefix="2" servo_origin="0.065 0.06 ${(servo_y/2)+0.01}" servo_yaw="3.402" />
+    <xacro:rotor prefix="2" />
+    <xacro:leg prefix="2" />
+    <xacro:servo prefix="3" servo_origin="-0.115 0.075 ${(servo_y/2)+0.01}" servo_yaw="5.233" />
+    <xacro:rotor prefix="3" />
+    <xacro:leg prefix="3" />
+
+    <link name="motion_platform">
+        <visual>
+            <geometry>
+                <cylinder length="0.005" radius="0.15"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <xacro:leg_platform_joint prefix="1" />
+
+</robot>
