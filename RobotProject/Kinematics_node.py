@@ -29,7 +29,7 @@ class KinematicsCom(Node):
 
     def __init__(self):
         self.kinematics = Kinematics.Kinematics()
-        super().__init__('ThreeDofCommunicator')
+        super().__init__('Kinematics_node')
         self.publisher_ = self.create_publisher(JointTrajectory, 'joint_trajectory_controller/joint_trajectory', 10)
         self.subscription = self.create_subscription(Pitchroll, 'pitch_roll_message',
             self.listener_callback, 10)

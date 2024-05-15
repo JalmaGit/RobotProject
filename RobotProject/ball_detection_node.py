@@ -11,7 +11,7 @@ class BallDetectionNode(Node):
 
     def __init__(self):
         """ Constructs all the necessary attributes for the ball detection node. """
-        super().__init__('ball_detection')
+        super().__init__('ball_detection_node')
 
         # Subscribe to the raw image topic
         self.subscription = self.create_subscription(

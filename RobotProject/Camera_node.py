@@ -24,7 +24,7 @@ from sensor_msgs.msg import Image
 class Camera(Node):
 
     def __init__(self):
-        super().__init__('Camera_Feed_SubPub')
+        super().__init__('Camera_node')
         self.publisher_ = self.create_publisher(Image, 'image_raw', 0)
         timer_period = 1.0/30  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)

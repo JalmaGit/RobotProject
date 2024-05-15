@@ -12,7 +12,7 @@ class BallSimulatorNode(Node):
     def __init__(self):
         super().__init__('ball_simulator')
         self.subscription = self.create_subscription(Pitchroll, 'pitch_roll_message', self.angle_callback, 10)
-        self.publisher = self.create_publisher(PointStamped, 'ball_position', 10)
+        self.publisher = self.create_publisher(PointStamped, 'sim_ball_position', 10)
         self.timer = self.create_timer(dt, self.publish_position)
         self.angle = Pitchroll()
         self.position = [0, 0]
