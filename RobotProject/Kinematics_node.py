@@ -20,6 +20,7 @@ from . import Kinematics
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from angle_msg.msg import Pitchroll
 from builtin_interfaces.msg import Duration
+import math
 
 class KinematicsCom(Node):
 
@@ -33,8 +34,11 @@ class KinematicsCom(Node):
         self.subscription = self.create_subscription(Pitchroll, 'pitch_roll_message',
             self.listener_callback, 10)
         self.subscription
+
+        self.jt_msg = JointTrajectory()
+        self.jt_msg.joint_names = ['ard_motorA', 'ard_motorB', 'ard_motorC'] 
        
-        timer_period = 0.1  # seconds
+        timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.i = 0
@@ -48,35 +52,23 @@ class KinematicsCom(Node):
         #self.get_logger().info('I heard: "%d"' % msg.roll) # CHANGE
 
     def timer_callback(self):
-        msg = JointTrajectory()
-    
-        current_time = self.get_clock().now()
-        msg.header.stamp = current_time.to_msg()
-
-        msg.joint_names = ['ard_motorA', 'ard_motorB', 'ard_motorC'] 
         
         points = JointTrajectoryPoint()
         #roll = round(1*math.sin(self.i),1)
         #pitch = round(1*math.cos(self.i),1)
-
+        
+        #newPoints = self.kinematics.inverse_kinematics(roll, pitch, 0)
         newPoints = self.kinematics.inverse_kinematics(self.pitchroll_msg.roll, self.pitchroll_msg.pitch, 0)
         print(newPoints)
 
         points.positions = newPoints
-        
-        duration_since_last_publish = current_time - self.last_publish_time
-        
-        #duration_msg = Duration()
-        #duration_msg.sec = 0  # You can adjust these values based on your requirements
-        #duration_msg.nanosec = 10000000  # For example, 0.1 seconds
-        points.time_from_start = duration_since_last_publish.to_msg()#duration_msg#
 
-        msg.points.append(points)
+        self.jt_msg.points = [points]
 
-        self.publisher_.publish(msg)
-        self.last_publish_time = current_time
+        self.publisher_.publish(self.jt_msg)
+        #self.last_publish_time = current_time
         #self.get_logger().info('Publishing: "%s"' % points.positions)
-        self.i += 0.5
+        self.i += 0.05
 
 
 # The names of the active joints in each trajec

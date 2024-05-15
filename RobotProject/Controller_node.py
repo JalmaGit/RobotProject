@@ -28,9 +28,9 @@ class Controller_node(Node):
     #Publish Motor Angle joints
 
     def __init__(self):
-        kp = 0.2 #0.0008#0.007 #0.4 Max
-        ki = 10 #0.001#0.001
-        kd = 0.0 #0.0075#0.008
+        kp = 0.0080 #0.004 #0.0008#0.007 #0.4 Max
+        ki = 0.00020 #0.00050 #0.001#0.001
+        kd = 0.0045 #0.00065  #0.00085 #0.0075#0.008
 
         self.PIDx = Controller.PID(kp, ki, kd)
         self.PIDy = Controller.PID(kp, ki, kd)
@@ -41,7 +41,7 @@ class Controller_node(Node):
             self.listener_callback, 10)
         self.subscription
         
-        timer_period = 0.001  # seconds
+        timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.last_time = time.time()
         self.point = Point()
@@ -63,18 +63,17 @@ class Controller_node(Node):
 
             centerpoint = [340, 244]
 
-            
-            roll = (340 - self.point.x)
-            pitch = (244 - self.point.y)
+            #roll = (340 - self.point.x)/100
+            #pitch = (244 - self.point.y)/100
 
-            #roll = self.PIDx.control(centerpoint[0], self.point.x, delta_time)
-            #pitch = self.PIDy.control(centerpoint[1], self.point.y, delta_time)
+            roll = self.PIDx.control(centerpoint[0], self.point.x, delta_time)
+            pitch = self.PIDy.control(centerpoint[1], self.point.y, delta_time)
 
-            msg.roll = np.deg2rad(roll)
-            msg.pitch = np.deg2rad(pitch)
+            msg.roll = roll
+            msg.pitch = pitch
 
             self.publisher_.publish(msg)
-            self.get_logger().info('Publishing roll: "%s"' % np.rad2deg(msg.roll))
+            self.get_logger().info('Publishing roll: "%s"' % msg.roll)
             self.get_logger().info('Reading I: "%s"' % self.PIDx.I)
 
 

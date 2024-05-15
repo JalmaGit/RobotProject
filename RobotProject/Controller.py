@@ -10,9 +10,9 @@ class PID():
         self.prevIntegral = 0
         self.prevError = 0
 
-        self.windupGuard = 30
+        self.windupGuard = 0.5
         self.enableWindup = True
-        self.maxAngle = 30
+        self.maxAngle = 1.24
 
         self.P = 0
         self.I = 0
@@ -43,8 +43,8 @@ class PID():
     def windup(self, I):
         
         if I >= self.windupGuard:
-            I = self.windupGuard
-        elif I <= -self.windupGuard:
             I = -self.windupGuard
+        elif I <= -self.windupGuard:
+            I = self.windupGuard
 
         return I 
